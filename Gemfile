@@ -12,6 +12,7 @@ gem 'sdoc',         '0.4.0', group: :doc
 gem "twitter-bootstrap-rails"
 gem 'angularjs-rails'
 gem 'responders', '~> 2.0'
+gem 'httparty'
 
 group :development, :test do
   gem 'sqlite3',     '1.3.9'

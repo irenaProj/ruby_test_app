@@ -7,8 +7,9 @@
 </div>
 
 <div ng-app="mnoApp">
-  <p ng-controller="mnoController">
+  <div ng-controller="mnoController">
     {{ employeeListData }}
+    <p><%= @content %></p>
     <ui-gmap-google-map center='map.center' zoom='map.zoom'></ui-gmap-google-map>
   </p>
   

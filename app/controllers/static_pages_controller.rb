@@ -31,15 +31,38 @@ class StaticPagesController < ApplicationController
     end  
   end  
 
-  # Prepare data to be displayed on "Employees location" widget - acquire raw data and process
-  def employeeLocationWidgetPrepare(dataType)
-    rawData = RawData.new(dataType)
-    @data = rawData.getMnoData()
+  # Prepare data to be displayed on "Employees location" widget - acquire raw data and process as following:
+  # data received from hr/employees_list and hr/employee_details is almost identical, locations can be 
+  # deducted based on employees_list only. In addition, "work_locations" key of some employees is empty and,
+  # where exists - it specifies the location via ID only, thus, for the sake of the exercise, widget will 
+  # be based on address field instead.
+  # In addition, for this exercise, location is determined by city and country, e.g 'San Francisco CA 94123, United States'
+  def employeeLocationWidgetPrepare()
+    locations = Hash.new
+    
+    employeesList = (RawData.new("employee_details").getMnoData())['content']['employees']
+    employeesList.each do | employee |
+      # extract the city/country information from the 'address' field
+      location = employee['address'].split(/\s*[,;]\s*/x).from(-2).join(', ')
+      #puts location
+      
+      # Update quantity in Hash
+      occurrence = locations.fetch(location, -1)
+      
+      if occurrence > 0
+        locations[location] += 1
+      else
+         locations[location] = 1
+      end    
+      
+      #puts locations
+    end
+    
+    return locations
   end  
   
-  
   def home
-    @employeesList = employeeLocationWidgetPrepare("employees_list")
+    @locationsData = employeeLocationWidgetPrepare()
     
     rawData = RawData.new("employee_details")
     @employeeDetails = rawData.getMnoData()

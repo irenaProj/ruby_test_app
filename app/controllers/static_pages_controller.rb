@@ -19,7 +19,7 @@ class StaticPagesController < ApplicationController
       elsif @dataType == 'employee_details'
         params = MultiJson.load('{"engine":"hr/employee_details", "metadata[organization_ids][]": "org-fbte"}')
       elsif @dataType == 'invoices'
-        params = MultiJson.load('{"engine":"invoices/list", "metadata[organization_ids][]": "org-fbte"}')
+        params = MultiJson.load('{"engine":"invoices/list", "metadata[organization_ids][]": "org-fbte", "metadata[entity]": "customers|suppliers"}')
       else
          raise StandardError
       end      
@@ -61,6 +61,32 @@ class StaticPagesController < ApplicationController
     return locations
   end  
   
+  # Prepare data to be displayed on "Sales flow" widget - acquire raw data and process as following:
+  # Retrieve data via Impac! API, 
+  def salesFlowWidgetPrepare()
+    locations = Hash.new
+    
+    employeesList = (RawData.new("employee_details").getMnoData())['content']['employees']
+    employeesList.each do | employee |
+      # extract the city/country information from the 'address' field
+      location = employee['address'].split(/\s*[,;]\s*/x).from(-2).join(', ')
+      #puts location
+      
+      # Update quantity in Hash
+      occurrence = locations.fetch(location, -1)
+      
+      if occurrence > 0
+        locations[location] += 1
+      else
+         locations[location] = 1
+      end    
+      
+      #puts locations
+    end
+    
+    return locations
+  end  
+
   def home
     @locationsData = employeeLocationWidgetPrepare()
     

@@ -7,12 +7,18 @@
 </div>
 
 <div ng-app="mnoApp">
-  <div ng-controller="mnoController">
-    {{ employeeListData }}    
+  <script>
+    <%= render "data_service.js.erb" %>
+  </script>
 
-    <p><%= @employeesList %></p>
-    <p><%= @employeeDetails %></p>
-    <p><%= @invoices %></p>
+  <div ng-controller="otherController">
+    <p>{{ employeeListData }}</p>
+  </div>
+  
+  <div ng-controller="mnoController">
+    <!--<p><%= @employeesList %></p>-->
+    <!--<p><%= @employeeDetails %></p>-->
+    <!--<p><%= @invoices %></p>-->
     <ui-gmap-google-map center='map.center' zoom='map.zoom'></ui-gmap-google-map>
   </p>
   

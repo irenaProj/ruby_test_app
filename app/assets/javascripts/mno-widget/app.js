@@ -8,25 +8,12 @@ mnoAppModule.config(function(uiGmapGoogleMapApiProvider) {
     });
 });
 
-mnoAppModule.controller('mnoController', ['$scope', 'uiGmapGoogleMapApi', function($scope, uiGmapGoogleMapApi) {
-  // var req = {
-  //   method: 'GET',
-  //   url: 'https://api-impac-uat.maestrano.io/api/v1/get_widget?engine=hr/employees_list&metadata[organization_ids][]=org-fbte',
-  //   headers: {
-  //   'Authorization': 'Basic NzJkYjk5ZDAtMDVkYy0wMTMzLWNlZmUtMjIwMDBhOTM4NjJiOl9jSU9waW1Jb0RpM1JJdmlXdGVPVEE='
-  //   }
-  // }
-
-  // $http(req).then(
-  //   function(response) {
-  //     $scope.employeeListData = response.data;
-  //   },
-  //   function(data) {
-      
-  //   }
-  // );
-   
+mnoAppModule.controller('mnoController', ['$scope', '$http', 'uiGmapGoogleMapApi', function($scope, $http, uiGmapGoogleMapApi) {
   uiGmapGoogleMapApi.then(function(maps) {
     $scope.map = { center: { latitude: 45, longitude: -73 }, zoom: 8 };
   });
+}]);
+
+mnoAppModule.controller('otherController', ['$scope', 'dataInitializer', function($scope, dataInitializer) {
+  $scope.employeeListData = dataInitializer;
 }]);

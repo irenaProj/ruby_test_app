@@ -15,6 +15,6 @@ mnoAppModule.controller('mnoController', ['$scope', '$http', 'uiGmapGoogleMapApi
   });
 }]);
 
-mnoAppModule.controller('otherController', ['$scope', 'dataInitializer', function($scope, dataInitializer) {
-  $scope.employeeListData = dataInitializer;
+mnoAppModule.controller('locationsController', ['$scope', 'locationsInitializer', function($scope, locationsInitializer) {
+  $scope.employeeListData = locationsInitializer;
 }]);

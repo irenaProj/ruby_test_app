@@ -11,14 +11,14 @@
     <%= render "data_service.js.erb" %>
   </script>
 
-  <div ng-controller="otherController">
-    <p>{{ employeeListData }}</p>
+  <div ng-controller="locationsController">
+    <!--<p>{{ employeeListData }}</p>-->
   </div>
   
   <div ng-controller="mnoController">
-    <!--<p><%= @employeesList %></p>-->
-    <!--<p><%= @employeeDetails %></p>-->
-    <!--<p><%= @invoices %></p>-->
+    <p><%= @employeesList.to_json.html_safe %></p>
+    <p><%= @employeeDetails.to_json.html_safe %></p>
+    <p><%= @invoices.to_json.html_safe %></p>
     <ui-gmap-google-map center='map.center' zoom='map.zoom'></ui-gmap-google-map>
   </p>
   

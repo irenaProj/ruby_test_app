@@ -8,8 +8,11 @@
 
 <div ng-app="mnoApp">
   <div ng-controller="mnoController">
-    {{ employeeListData }}
-    <p><%= @content %></p>
+    {{ employeeListData }}    
+
+    <p><%= @employeesList %></p>
+    <p><%= @employeeDetails %></p>
+    <p><%= @invoices %></p>
     <ui-gmap-google-map center='map.center' zoom='map.zoom'></ui-gmap-google-map>
   </p>
   

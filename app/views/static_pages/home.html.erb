@@ -6,7 +6,7 @@
   </h2>
 </div>
 
-<div ng-app="mnoApp">
+<div class="row" ng-app="mnoApp">
   <script>
     <%= render "data_service.js.erb" %>
   </script>
@@ -21,8 +21,14 @@
     <p><%= @invoices.to_json.html_safe %></p>
   </p>
   
-  <div ng-controller="MarkersClusteringController">
-    <leaflet center="center" markers="markers" layers="layers" width="100%" height="480px"></leaflet>
+  <div class="col-sm-6" ng-controller="MarkersClusteringController1">
+    <leaflet center="center" markers="markers" layers="layers" width="100%" height="300px"></leaflet>
+    <h1>Marker clustering example</h1>
+    <p>You can create a marker-clustering group on the map, defining <strong>layers</strong> and your <strong>markers</strong> definition as this example.</p>
+  </div>
+
+  <div class="col-sm-6" ng-controller="MarkersClusteringController2">
+    <leaflet center="center" markers="markers" layers="layers" width="100%" height="300px"></leaflet>
     <h1>Marker clustering example</h1>
     <p>You can create a marker-clustering group on the map, defining <strong>layers</strong> and your <strong>markers</strong> definition as this example.</p>
   </div>

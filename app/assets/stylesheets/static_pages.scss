@@ -5,20 +5,16 @@
 @import "bootstrap";
 
 
-#map_canvas {
-  height: 100%;
+.angular-leaflet-map {
   width: 100%;
-  margin: 0px;
+  height: 320px;
 }
-
-#map_canvas {
-  position: relative;
+.left {
+  float: left;
+  width: 58%;
+  padding-right: 1em;
 }
-
-.angular-google-map-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
+.right {
+  float: right;
+  width: 40%;
 }

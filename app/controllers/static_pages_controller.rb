@@ -10,6 +10,7 @@ class StaticPagesController < ApplicationController
       @dataType = dataType  
     end  
     
+    # Read raw data per provided type
     def getMnoData  
       #curl -g -k -u 72db99d0-05dc-0133-cefe-22000a93862b:_cIOpimIoDi3RIviWteOTA -H "Accept: application/json" "https://api-impac-uat.maestrano.io/api/v1/get_widget?engine=hr/employees_list&metadata[organization_ids][]=org-fbte"
       
@@ -29,31 +30,25 @@ class StaticPagesController < ApplicationController
       @content = HTTParty.get("http://api-impac-uat.maestrano.io/api/v1/get_widget", options)
     end  
   end  
+
+  # Prepare data to be displayed on "Employees location" widget - acquire raw data and process
+  def employeeLocationWidgetPrepare(dataType)
+    rawData = RawData.new(dataType)
+    @data = rawData.getMnoData()
+  end  
+  
   
   def home
-    rawData = RawData.new("employees_list")
-    @employeesList = rawData.getMnoData();
-
+    @employeesList = employeeLocationWidgetPrepare("employees_list")
+    
     rawData = RawData.new("employee_details")
-    @employeeDetails = rawData.getMnoData();
+    @employeeDetails = rawData.getMnoData()
 
     rawData = RawData.new("invoices")
-    @invoices = rawData.getMnoData();
+    @invoices = rawData.getMnoData()
 
   end
 
   def help
   end
 end
-
-    # #curl -g -k -u 72db99d0-05dc-0133-cefe-22000a93862b:_cIOpimIoDi3RIviWteOTA -H "Accept: application/json" "https://api-impac-uat.maestrano.io/api/v1/get_widget?engine=hr/employees_list&metadata[organization_ids][]=org-fbte"
-    
-    # #params = MultiJson.load('{"engine":"hr/employees_list", "metadata[organization_ids][]": "org-fbte"}')
-
-    # auth = {username: "72db99d0-05dc-0133-cefe-22000a93862b", password: "_cIOpimIoDi3RIviWteOTA"}
-    # #options = {query: params, basic_auth: auth}
-    
-    # @content = HTTParty.get("http://api-impac-uat.maestrano.io/api/v1/get_widget?engine=hr/employees_list&metadata[organization_ids][]=org-fbte", 
-    #                 {basic_auth: auth})
-
-    # #@content = MultiJson.load('{"abc":"def"}') #=> {"abc" => "def"}

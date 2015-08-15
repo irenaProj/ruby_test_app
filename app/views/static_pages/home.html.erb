@@ -20,10 +20,6 @@
     <p><%= @employeeDetails.to_json.html_safe %></p>
     <p><%= @invoices.to_json.html_safe %></p>
 
-    <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="true" options="options">
-      <ui-gmap-circle ng-repeat="c in circles track by c.id" center="c.center" stroke="c.stroke" fill="c.fill" radius="c.radius"
-            visible="c.visible" geodesic="c.geodesic" editable="c.editable" draggable="c.draggable" clickable="c.clickable" control="c.control"></ui-gmap-circle>
-    </ui-gmap-google-map>
   </p>
   
 </div>

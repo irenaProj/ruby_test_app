@@ -89,6 +89,7 @@ class StaticPagesController < ApplicationController
 
   def home
     @locationsData = employeeLocationWidgetPrepare()
+    puts @locationsData
     
     rawData = RawData.new("employee_details")
     @employeeDetails = rawData.getMnoData()

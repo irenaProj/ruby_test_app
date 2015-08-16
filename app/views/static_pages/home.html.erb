@@ -12,7 +12,7 @@
   </script>
 
   <div ng-controller="locationsController">
-    <p>{{ locationsData }}</p>
+    <p>{{ employeeLocationsData }}</p>
   </div>
   
   <div class="col-sm-6" ng-controller="MarkersClusteringController1">
@@ -27,8 +27,6 @@
     <p>You can create a marker-clustering group on the map, defining <strong>layers</strong> and your <strong>markers</strong> definition as this example.</p>
   </div>
   <div>
-    <p><%= @locationsData.to_json.html_safe %></p>
-    <p><%= @employeeDetails.to_json.html_safe %></p>
     <p><%= @invoices.to_json.html_safe %></p>
   </p>
   

@@ -37,7 +37,6 @@ class StaticPagesController < ApplicationController
   # deducted based on employees_list only. In addition, "work_locations" key of some employees is empty and,
   # where exists - it specifies the location via ID only, thus, for the sake of the exercise, widget will 
   # be based on address field instead.
-  # In addition, for this exercise, location is determined by city and country, e.g 'San Francisco CA 94123, United States'
   def employeeLocationWidgetPrepare()
     locations = Hash.new
     
@@ -61,6 +60,137 @@ class StaticPagesController < ApplicationController
     end
 
     return locations
+  end  
+  
+  # Prepare data to be displayed on "Employees location" widget - acquire raw data and process as following:
+  # data received from hr/employees_list and hr/employee_details is almost identical, locations can be 
+  # deducted based on employees_list only. In addition, "work_locations" key of some employees is empty and,
+  # where exists - it specifies the location via ID only, thus, for the sake of the exercise, widget will 
+  # be based on address field instead.
+  def employeeLocationWidgetPrepare()
+    locations = Hash.new
+    
+    employeesList = (RawData.new("employee_details").getMnoData())['content']['employees']
+    employeesList.each do | employee |
+      # extract the city/country information from the 'address' field
+      address = employee['address']
+      location = employee['address'].gsub(/\ \d+/, "")
+      location = location.split(/\s*[,;]\s*/x).from(-2).join(', ')
+      
+      # Add to locations records
+      occurrence = locations.fetch(location, nil)
+      
+      if !occurrence
+         locations[location] = Array.new
+      end    
+      
+      locations[location].push(address)
+      
+      #puts locations
+    end
+
+    return locations
+  end  
+  
+  # Prepare data to be displayed on "Sales flow" widget - acquire raw data and process as following:
+  # Retrieve data via Impac! API, where "address" field contains enough data to allow geolocation,
+  # add address and the invoice data to the records 
+  def salesFlowWidgetPrepare()
+    # Opacity set for the marker with lowest total
+    min_opacity = 0.25 
+    
+    # Maximal opacity (1) - min_opacity (0.25)
+    opacity_range = 0.75
+
+    markers = Hash.new
+    invoicesData = Hash.new
+    minAmount = 1152921504606846976 # 2^60
+    maxAmount = -1
+    recNum = 0
+    
+    invoicesData["center"] = { 'lat'=> 35.864716, 'lng'=> 2.349014, 'zoom'=> 1  }
+    
+    invoicesList = (RawData.new("invoices").getMnoData())['content']['entities']
+    
+    invoicesList.each { | invoice |
+      # First, extract 'address' field and check if contains enough details to identify on a map
+      addrRaw = invoice['address']
+      location =  (addrRaw['s']  == "-") ? "" : "#{addrRaw['s']}, "
+      location += (addrRaw['s2'] == "-") ? "" : "#{addrRaw['s2']}," 
+      location += (addrRaw['l']  == "-") ? "" : "#{addrRaw['l']}, " 
+      location += (addrRaw['r']  == "-") ? "" : "#{addrRaw['r']}, " 
+      location += (addrRaw['z']  == "-") ? "" : "#{addrRaw['z']}, " 
+      location += (addrRaw['c']  == "-") ? "" : "#{addrRaw['c']}"
+      
+      result = Geocoder.search(location) 
+      
+      # If no results are returned or multiple results (ambigues), skip this record
+      if result.length == 1
+        recNum += 1
+  
+        # Fill information about this location (company) to be displayed on a map
+        # Opacity is set to 1 by default, will be changed in the second pass if required
+        marker = Hash.new    
+        totalInvoiced = invoice['total_invoiced']
+        
+        marker['lat'] = result[0].latitude
+        marker['lng'] = result[0].longitude
+        marker['message'] = "#{invoice['name']}, total invoiced: $#{totalInvoiced} USD" 
+        marker['focus'] = false
+        marker['opacity'] = 1
+        marker['total'] = totalInvoiced
+        
+        # Check for min/max
+        if totalInvoiced > maxAmount
+          maxAmount = totalInvoiced
+        end
+
+        if totalInvoiced < minAmount
+          minAmount = totalInvoiced
+        end
+        
+        markers["marker#{recNum}"] = marker
+      end    
+    }
+
+    puts "33333333"
+    puts minAmount
+    puts maxAmount
+      
+    # Opacity range [0.25, 1], invoices range [minAmount, maxAmount],
+    # calculate opacity for each marker 
+    if maxAmount > minAmount
+      markers.each do | record, value |
+        markerTotal = value['total']
+        puts markerTotal
+        value['opacity'] = min_opacity + ((( markerTotal - minAmount) / ( maxAmount - minAmount )) * opacity_range)
+        value.delete 'total'
+        puts value
+      end
+    end
+    
+    puts "4444444"
+    puts markers
+    
+    # Add baselayers
+    invoicesData['layers'] = Hash.new
+    
+    # Add baselayers
+    invoicesData['layers']['baselayers'] = {
+      'mapbox_light' => {
+        'name' => 'Mapbox Light',
+        'url' => 'http://api.tiles.mapbox.com/v4/{mapid}/{z}/{x}/{y}.png?access_token={apikey}',
+        'type' => 'xyz',
+        'layerOptions' => {
+          'apikey' => 'pk.eyJ1IjoiYnVmYW51dm9scyIsImEiOiJLSURpX0pnIn0.2_9NrLz1U9bpwMQBhVk97Q',
+          'mapid' => 'bufanuvols.lia22g09'
+        }
+      }
+    }
+    
+    invoicesData['markers'] = markers
+    
+    return invoicesData
   end  
   
   # Build object as expected by the map plugin
@@ -91,7 +221,6 @@ class StaticPagesController < ApplicationController
     # Add overlays
     workLocationsData['layers']['overlays'] = Hash.new
 
-    puts locations
     locations.each do | key, addrArray |
       
       # Build each marker and add to the list
@@ -102,9 +231,7 @@ class StaticPagesController < ApplicationController
         
         # Build marker
         result = Geocoder.search(addr)
-        puts result[0].latitude
-        puts result[0].longitude
-        
+
         marker['layer'] = key
         marker['lat'] = result[0].latitude
         marker['lng'] = result[0].longitude
@@ -117,53 +244,21 @@ class StaticPagesController < ApplicationController
       workLocationsData['markers'] = Hash.new
       workLocationsData['markers'] = markers
       
+      # Build overlays - allow removing data from the map
       workLocationsData['layers']['overlays'][key] = Hash.new
       workLocationsData['layers']['overlays'][key]['name'] = key
       workLocationsData['layers']['overlays'][key]['type'] = 'markercluster'
       workLocationsData['layers']['overlays'][key]['visible'] = true
-    
     end
     
-    puts workLocationsData
     return workLocationsData
   end
   
-  # Prepare data to be displayed on "Sales flow" widget - acquire raw data and process as following:
-  # Retrieve data via Impac! API, 
-  def salesFlowWidgetPrepare()
-    locations = Hash.new
-    
-    employeesList = (RawData.new("employee_details").getMnoData())['content']['employees']
-    employeesList.each do | employee |
-      # extract the city/country information from the 'address' field
-      location = employee['address'].split(/\s*[,;]\s*/x).from(-2).join(', ')
-      
-      # Update quantity in Hash
-      occurrence = locations.fetch(location, -1)
-      
-      if occurrence > 0
-        locations[location] += 1
-      else
-         locations[location] = 1
-      end    
-      
-      #puts locations
-    end
-    
-    return locations
-  end  
-
   def home
     locationsData = employeeLocationWidgetPrepare()
-    # puts @locationsData
-    @locationsData = prepareMapMarkers(locationsData)
+    @employeeLocationsData = prepareMapMarkers(locationsData)
     
-    rawData = RawData.new("employee_details")
-    @employeeDetails = rawData.getMnoData()
-
-    rawData = RawData.new("invoices")
-    @invoices = rawData.getMnoData()
-
+    @invoices = salesFlowWidgetPrepare()
   end
 
   def help

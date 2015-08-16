@@ -1,3 +1,7 @@
-mnoAppModule.service('locationsInitializer', function(){
-  return <%= @locationsData.to_json.html_safe %>;
+mnoAppModule.service('employeeLocationsInitializer', function(){
+  return <%= @employeeLocationsData.to_json.html_safe %>;
+});
+
+mnoAppModule.service('invoicesDataInitializer', function(){
+  return <%= @invoices.to_json.html_safe %>;
 });

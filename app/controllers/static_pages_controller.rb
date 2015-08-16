@@ -97,10 +97,10 @@ class StaticPagesController < ApplicationController
   # add address and the invoice data to the records 
   def salesFlowWidgetPrepare()
     # Opacity set for the marker with lowest total
-    min_opacity = 0.25 
+    min_opacity = 0.4 
     
-    # Maximal opacity (1) - min_opacity (0.25)
-    opacity_range = 0.75
+    # Maximal opacity (1) - min_opacity (0.4)
+    opacity_range = 0.6
 
     markers = Hash.new
     invoicesData = Hash.new
@@ -108,7 +108,7 @@ class StaticPagesController < ApplicationController
     maxAmount = -1
     recNum = 0
     
-    invoicesData["center"] = { 'lat'=> 35.864716, 'lng'=> 2.349014, 'zoom'=> 1  }
+    invoicesData["center"] = { 'lat'=> -23.6974800, 'lng'=> 133.8836200, 'zoom'=> 3 }
     
     invoicesList = (RawData.new("invoices").getMnoData())['content']['entities']
     
@@ -157,8 +157,8 @@ class StaticPagesController < ApplicationController
     puts minAmount
     puts maxAmount
       
-    # Opacity range [0.25, 1], invoices range [minAmount, maxAmount],
-    # calculate opacity for each marker 
+    # Opacity range [0.4, 1], invoices range [minAmount, maxAmount],
+    # calculate relative opacity for each marker 
     if maxAmount > minAmount
       markers.each do | record, value |
         markerTotal = value['total']
@@ -182,6 +182,7 @@ class StaticPagesController < ApplicationController
         'url' => 'http://api.tiles.mapbox.com/v4/{mapid}/{z}/{x}/{y}.png?access_token={apikey}',
         'type' => 'xyz',
         'layerOptions' => {
+          # Optional for the free service
           'apikey' => 'pk.eyJ1IjoiYnVmYW51dm9scyIsImEiOiJLSURpX0pnIn0.2_9NrLz1U9bpwMQBhVk97Q',
           'mapid' => 'bufanuvols.lia22g09'
         }
@@ -212,6 +213,7 @@ class StaticPagesController < ApplicationController
         'url' => 'http://api.tiles.mapbox.com/v4/{mapid}/{z}/{x}/{y}.png?access_token={apikey}',
         'type' => 'xyz',
         'layerOptions' => {
+          # Optional for the free service
           'apikey' => 'pk.eyJ1IjoiYnVmYW51dm9scyIsImEiOiJLSURpX0pnIn0.2_9NrLz1U9bpwMQBhVk97Q',
           'mapid' => 'bufanuvols.lia22g09'
         }

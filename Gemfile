@@ -14,6 +14,7 @@ gem 'angularjs-rails'
 gem 'responders', '~> 2.0'
 gem 'httparty'
 gem 'geocoder'
+gem 'jquery-ui-rails'
 
 group :development, :test do
   gem 'sqlite3',     '1.3.9'

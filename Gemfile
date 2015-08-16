@@ -13,6 +13,7 @@ gem "twitter-bootstrap-rails"
 gem 'angularjs-rails'
 gem 'responders', '~> 2.0'
 gem 'httparty'
+gem 'geocoder'
 
 group :development, :test do
   gem 'sqlite3',     '1.3.9'

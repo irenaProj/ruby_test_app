@@ -1,6 +1,7 @@
 class StaticPagesController < ApplicationController
   require 'multi_json'
   require 'httparty'
+  require 'geocoder'
   
   # Class for retrieving data using Impac! API
   class RawData  
@@ -43,23 +44,89 @@ class StaticPagesController < ApplicationController
     employeesList = (RawData.new("employee_details").getMnoData())['content']['employees']
     employeesList.each do | employee |
       # extract the city/country information from the 'address' field
-      location = employee['address'].split(/\s*[,;]\s*/x).from(-2).join(', ')
-      #puts location
+      address = employee['address']
+      location = employee['address'].gsub(/\ \d+/, "")
+      location =location.split(/\s*[,;]\s*/x).from(-2).join(', ')
       
       # Update quantity in Hash
-      occurrence = locations.fetch(location, -1)
+      occurrence = locations.fetch(location, nil)
       
-      if occurrence > 0
-        locations[location] += 1
-      else
-         locations[location] = 1
+      if !occurrence
+         locations[location] = Array.new
       end    
+      
+      locations[location].push(address)
       
       #puts locations
     end
-    
+
     return locations
   end  
+  
+  # Build object as expected by the map plugin
+  def prepareMapMarkers(locations)
+    workLocationsData = Hash.new
+    markers = Hash.new
+    count = 0
+    
+    # Add map config
+    workLocationsData["center"] = { 'lat'=> 35.864716, 'lng'=> 2.349014, 'zoom'=> 1  }
+
+    # Add layers: baselayers and overlays
+    workLocationsData['layers'] = Hash.new
+    
+    # Add baselayers
+    workLocationsData['layers']['baselayers'] = {
+      'mapbox_light' => {
+        'name' => 'Mapbox Light',
+        'url' => 'http://api.tiles.mapbox.com/v4/{mapid}/{z}/{x}/{y}.png?access_token={apikey}',
+        'type' => 'xyz',
+        'layerOptions' => {
+          'apikey' => 'pk.eyJ1IjoiYnVmYW51dm9scyIsImEiOiJLSURpX0pnIn0.2_9NrLz1U9bpwMQBhVk97Q',
+          'mapid' => 'bufanuvols.lia22g09'
+        }
+      }
+    }
+    
+    # Add overlays
+    workLocationsData['layers']['overlays'] = Hash.new
+
+    puts locations
+    locations.each do | key, addrArray |
+      
+      # Build each marker and add to the list
+      addrArray.each { |addr|
+        marker = Hash.new
+        count += 1
+        puts addr
+        
+        # Build marker
+        result = Geocoder.search(addr)
+        puts result[0].latitude
+        puts result[0].longitude
+        
+        marker['layer'] = key
+        marker['lat'] = result[0].latitude
+        marker['lng'] = result[0].longitude
+        
+        # Add to the list
+        markers["addr" + "#{count}"] = marker
+      }
+      
+      # Integrate markers
+      workLocationsData['markers'] = Hash.new
+      workLocationsData['markers'] = markers
+      
+      workLocationsData['layers']['overlays'][key] = Hash.new
+      workLocationsData['layers']['overlays'][key]['name'] = key
+      workLocationsData['layers']['overlays'][key]['type'] = 'markercluster'
+      workLocationsData['layers']['overlays'][key]['visible'] = true
+    
+    end
+    
+    puts workLocationsData
+    return workLocationsData
+  end
   
   # Prepare data to be displayed on "Sales flow" widget - acquire raw data and process as following:
   # Retrieve data via Impac! API, 
@@ -70,7 +137,6 @@ class StaticPagesController < ApplicationController
     employeesList.each do | employee |
       # extract the city/country information from the 'address' field
       location = employee['address'].split(/\s*[,;]\s*/x).from(-2).join(', ')
-      #puts location
       
       # Update quantity in Hash
       occurrence = locations.fetch(location, -1)
@@ -88,8 +154,9 @@ class StaticPagesController < ApplicationController
   end  
 
   def home
-    @locationsData = employeeLocationWidgetPrepare()
-    puts @locationsData
+    locationsData = employeeLocationWidgetPrepare()
+    # puts @locationsData
+    @locationsData = prepareMapMarkers(locationsData)
     
     rawData = RawData.new("employee_details")
     @employeeDetails = rawData.getMnoData()

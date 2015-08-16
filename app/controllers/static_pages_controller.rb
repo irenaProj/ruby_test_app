@@ -42,7 +42,7 @@ class StaticPagesController < ApplicationController
     
     # Add map config: center and zoom
     if widgetType == 'employee_details'
-      data["center"] = { 'lat'=> 35.864716, 'lng'=> 2.349014, 'zoom'=> 1  }
+      data["center"] = { 'lat'=> 35.864716, 'lng'=> 10.349014, 'zoom'=> 1  }
     elsif widgetType == 'invoices'
       data["center"] = { 'lat'=> -23.6974800, 'lng'=> 133.8836200, 'zoom'=> 3 }
     else

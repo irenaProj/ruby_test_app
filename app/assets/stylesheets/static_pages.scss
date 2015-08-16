@@ -4,6 +4,64 @@
 @import "bootstrap-sprockets";
 @import "bootstrap";
 
+body {
+  background-color: rgb(230, 237, 238);
+}
+
+.mno-logo {
+  display: inline-block;
+  background-image: image-url('transparent-logo.png');
+  float: left; 
+  margin-right: 15px;
+  width: 200px;
+  height: 48px;
+  }
+
+.text-info {
+  font-weight: 300;
+  padding-top: 7px;
+  height: 48px;
+  color: #67bbe9;
+}
+
+.head-title {
+  padding: 5px;
+  border-bottom: 1px solid #abc4c6;
+  margin-bottom: 2em;
+}
+
+.widget {
+  padding: 12px;
+}
+
+.top-line {
+  cursor: move;
+  background-color: white;
+  padding: 9px 9px 0px 9px;
+  border-radius: 5px 5px 0px 0px;
+  border: solid 1px #c8d7d9;
+  border-bottom: none;
+  min-height: 41px;
+  -webkit-box-shadow: 0 1px 8px -4px;
+  box-shadow: 0 1px 8px -4px;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 12px;
+  color: #5b6667;
+  text-align: left;
+}
+
+.content {
+  padding: 9px;
+  border-radius: 0px 0px 5px 5px;
+  border: solid 1px #c8d7d9;
+  border-top: none;
+  background-color: white;
+  min-height: 250px;
+  vertical-align: top;
+  -webkit-box-shadow: 0 1px 8px -4px;
+  box-shadow: 0 1px 8px -4px;
+}
 
 .angular-leaflet-map {
   width: 100%;

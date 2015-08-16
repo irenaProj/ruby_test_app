@@ -224,7 +224,7 @@ class StaticPagesController < ApplicationController
   
   def home
     @employeeLocationsData = employeeLocationWidgetPrepare()
-    @invoices = salesFlowWidgetPrepare()
+    @invoicesData = salesFlowWidgetPrepare()
   end
 
   def help

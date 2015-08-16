@@ -11,23 +11,12 @@
     <%= render "data_service.js.erb" %>
   </script>
 
-  <div ng-controller="locationsController">
-    <p>{{ employeeLocationsData }}</p>
-  </div>
-  
-  <div class="col-sm-6" ng-controller="MarkersClusteringController1">
+  <div class="col-sm-6" ng-controller="EmployeeLocationWidgetController">
     <leaflet center="center" markers="markers" layers="layers" width="100%" height="300px"></leaflet>
-    <h1>Marker clustering example</h1>
-    <p>You can create a marker-clustering group on the map, defining <strong>layers</strong> and your <strong>markers</strong> definition as this example.</p>
   </div>
 
-  <div class="col-sm-6" ng-controller="MarkersClusteringController2">
+  <div class="col-sm-6" ng-controller="SalesFlowWidgetController">
     <leaflet center="center" markers="markers" layers="layers" width="100%" height="300px"></leaflet>
-    <h1>Marker clustering example</h1>
-    <p>You can create a marker-clustering group on the map, defining <strong>layers</strong> and your <strong>markers</strong> definition as this example.</p>
   </div>
-  <div>
-    <p><%= @invoices.to_json.html_safe %></p>
-  </p>
-  
+
 </div>

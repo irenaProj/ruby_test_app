@@ -148,23 +148,37 @@ class StaticPagesController < ApplicationController
   # The following manipulations are preformed to improve the addess:
   # 1. If first address row contains P O Box substring, the row is ignored
   # 2. If address does not contain an 'AU', it is added to the end of the address
+  # 3. Two addresses are prepared, one that contains the first line (if not P O Box),
+  #    one without: if the full address fails, try the second one
+  
+  # Note: it is possible to go deeper and create more compex scenarious for
+  # salvaging the address, here I attempted only to show that it is possible 
+  # and support several basic cases
   def buildAddress(addrRaw)
     # Check if first address row contains P O Box substring
-    #isPoB = addrRaw['s'].include? "P O Box"
-    
-    #location =  (addrRaw['s']  == "-" || isPoB) ? "" : "#{addrRaw['s']}, "
-    location = (addrRaw['s2'] == "-") ? "" : "#{addrRaw['s2']}," 
-    location += (addrRaw['l']  == "-") ? "" : "#{addrRaw['l']}, " 
-    location += (addrRaw['r']  == "-") ? "" : "#{addrRaw['r']}, " 
-    location += (addrRaw['z']  == "-") ? "" : "#{addrRaw['z']}, " 
-    location += (addrRaw['c']  == "-") ? "" : "#{addrRaw['c']}"
-    
+    isPoB = addrRaw['s'].include? "P O Box"
+    location = Array.new
+
+    fullLoc =  (addrRaw['s']  == "-" || isPoB) ? "" : "#{addrRaw['s']}, "
+    partialLoc = (addrRaw['s2'] == "-") ? "" : "#{addrRaw['s2']}," 
+    partialLoc += (addrRaw['l']  == "-") ? "" : "#{addrRaw['l']}, " 
+    partialLoc += (addrRaw['r']  == "-") ? "" : "#{addrRaw['r']}, " 
+    partialLoc += (addrRaw['z']  == "-") ? "" : "#{addrRaw['z']}, " 
+    partialLoc += (addrRaw['c']  == "-") ? "" : "#{addrRaw['c']}"
+
+    fullLoc += partialLoc
+
     # If address does not contain an 'AU', it is added to the end of the address
-    if location != ""
-      if location.exclude? "AU"
-        location += ", AU"
+    if fullLoc != ""
+      if fullLoc.exclude? "AU"
+        # Set fullLoc as well as partialLoc in case all address was contained in the first line
+        fullLoc += ", AU"
+        partialLoc += ", AU"
       end
     end
+    
+    location[0] = fullLoc
+    location[1] = partialLoc
     
     return location
   end
@@ -174,10 +188,10 @@ class StaticPagesController < ApplicationController
   # add address and the invoice data to the records 
   def salesFlowWidgetPrepare()
     # Opacity set for the marker with lowest total
-    min_opacity = 0.4 
+    min_opacity = 0.25
     
     # Maximal opacity (1) - min_opacity (0.4)
-    opacity_range = 0.6
+    opacity_range = 1 - min_opacity
 
     markers = Hash.new
     invoicesData = Hash.new
@@ -194,8 +208,14 @@ class StaticPagesController < ApplicationController
       
       result = Array.new
       
-      if location != ""
-        result = Geocoder.search(location) 
+      # Try the full address first
+      if location[0] != ""
+        result = Geocoder.search(location[0]) 
+        
+        if result.length != 1
+          # Give the partial address a chance
+          result = Geocoder.search(location[1]) 
+        end
       end
       
       # If no results are returned or multiple results (ambigues), skip this record
@@ -226,10 +246,11 @@ class StaticPagesController < ApplicationController
         markers["marker#{recNum}"] = marker
       end    
     }
-
-    # Opacity range [0.4, 1], invoices range [minAmount, maxAmount],
+    
+    # Opacity range [0.25, 1], invoices range [minAmount, maxAmount],
     # calculate relative opacity for each marker 
     markers.each do | record, value |
+      #puts "#{value}"
       if maxAmount > minAmount
         value['opacity'] = min_opacity + ((( value['total'] - minAmount) / ( maxAmount - minAmount )) * opacity_range)
       end

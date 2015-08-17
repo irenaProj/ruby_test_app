@@ -145,13 +145,13 @@ class StaticPagesController < ApplicationController
   
   # Parse company address fields and attempt to create a valid address.
   # It is assumed all addresses are in Australia
-  # The following manipulations are preformed to improve the addess:
+  # The following manipulations are preformed to improve the address:
   # 1. If first address row contains P O Box substring, the row is ignored
   # 2. If address does not contain an 'AU', it is added to the end of the address
   # 3. Two addresses are prepared, one that contains the first line (if not P O Box),
   #    one without: if the full address fails, try the second one
   
-  # Note: it is possible to go deeper and create more compex scenarious for
+  # Note: it is possible to go deeper and create more complex scenarios for
   # salvaging the address, here I attempted only to show that it is possible 
   # and support several basic cases
   def buildAddress(addrRaw)

@@ -143,6 +143,32 @@ class StaticPagesController < ApplicationController
     return finalizeMap('employee_details', workLocationsData)
   end
   
+  # Parse company address fields and attempt to create a valid address.
+  # It is assumed all addresses are in Australia
+  # The following manipulations are preformed to improve the addess:
+  # 1. If first address row contains P O Box substring, the row is ignored
+  # 2. If address does not contain an 'AU', it is added to the end of the address
+  def buildAddress(addrRaw)
+    # Check if first address row contains P O Box substring
+    #isPoB = addrRaw['s'].include? "P O Box"
+    
+    #location =  (addrRaw['s']  == "-" || isPoB) ? "" : "#{addrRaw['s']}, "
+    location = (addrRaw['s2'] == "-") ? "" : "#{addrRaw['s2']}," 
+    location += (addrRaw['l']  == "-") ? "" : "#{addrRaw['l']}, " 
+    location += (addrRaw['r']  == "-") ? "" : "#{addrRaw['r']}, " 
+    location += (addrRaw['z']  == "-") ? "" : "#{addrRaw['z']}, " 
+    location += (addrRaw['c']  == "-") ? "" : "#{addrRaw['c']}"
+    
+    # If address does not contain an 'AU', it is added to the end of the address
+    if location != ""
+      if location.exclude? "AU"
+        location += ", AU"
+      end
+    end
+    
+    return location
+  end
+  
   # Prepare data to be displayed on "Sales flow" widget - acquire raw data and process as following:
   # Retrieve data via Impac! API, where "address" field contains enough data to allow geolocation,
   # add address and the invoice data to the records 
@@ -164,14 +190,13 @@ class StaticPagesController < ApplicationController
     invoicesList.each { | invoice |
       # First, extract 'address' field and check if contains enough details to identify on a map
       addrRaw = invoice['address']
-      location =  (addrRaw['s']  == "-") ? "" : "#{addrRaw['s']}, "
-      location += (addrRaw['s2'] == "-") ? "" : "#{addrRaw['s2']}," 
-      location += (addrRaw['l']  == "-") ? "" : "#{addrRaw['l']}, " 
-      location += (addrRaw['r']  == "-") ? "" : "#{addrRaw['r']}, " 
-      location += (addrRaw['z']  == "-") ? "" : "#{addrRaw['z']}, " 
-      location += (addrRaw['c']  == "-") ? "" : "#{addrRaw['c']}"
+      location = buildAddress(addrRaw)
       
-      result = Geocoder.search(location) 
+      result = Array.new
+      
+      if location != ""
+        result = Geocoder.search(location) 
+      end
       
       # If no results are returned or multiple results (ambigues), skip this record
       if result.length == 1
